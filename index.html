@@ -7,8 +7,8 @@
 <meta name="description" content="《博物志》第一编《草木》：华南地区户外植物识别，B6 手帐式植物形态图谱、检索表和科属种图鉴。">
 <title>草木 · 博物志第一编</title>
 <!-- One self-contained HTML, original CSS paper texture. Botanical illustrations reserved. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Long+Cang&display=swap" media="print" onload="this.media='all';window.reflowBook?.()">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Long+Cang&display=swap');
 :root{--shell:#292f29;--paper:#e9dec0;--paper-h:#f4ead1;--ink:#39362e;--soft:#746b57;--accent:#56664d;--line:rgba(91,76,54,.26);--reader-size:1;--hand:'Long Cang','STKaiti','KaiTi',serif;--body:'STKaiti','KaiTi','Kaiti SC','Noto Serif CJK SC',serif}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;}body{background:radial-gradient(ellipse at top,#40483d,#252a26 66%);color:var(--ink);font-family:var(--body)}button,input{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #c3a56c;outline-offset:3px}a{color:inherit;text-decoration:none}
 body.tone-light{--paper:#f3ead6;--paper-h:#fff6e7;--ink:#2e2e28;--soft:#676455}body.tone-white{--paper:#fffefa;--paper-h:#fff;--ink:#292d2b;--soft:#5c625b}
@@ -161,7 +161,7 @@ document.getElementById('prev').addEventListener('click',()=>go(state.page-sprea
 document.getElementById('searchInput').addEventListener('input',e=>search(e.target.value));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')searchOpen(false);if(e.key==='/'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();searchOpen(true)}if(document.getElementById('searchPanel').classList.contains('open'))return;if(e.key==='ArrowRight')go(state.page+spreadCount());if(e.key==='ArrowLeft')go(state.page-spreadCount())});
 let widthBefore=window.innerWidth;window.addEventListener('resize',()=>{if((widthBefore>=920)!==(window.innerWidth>=920)){const id=physical[state.page]?.id; widthBefore=window.innerWidth;gotoId(id||'cover')}else{widthBefore=window.innerWidth;render()}});
-applyTone();document.documentElement.style.setProperty('--reader-size',state.font.toFixed(2));paginate();const initial=decodeURIComponent(location.hash.replace(/^#/,''));gotoId(initial in indexById?initial:'cover');
+window.reflowBook=()=>{if(!physical.length)return;const id=physical[state.page]?.id||'cover';paginate();gotoId(id)};applyTone();document.documentElement.style.setProperty('--reader-size',state.font.toFixed(2));paginate();const initial=decodeURIComponent(location.hash.replace(/^#/,''));gotoId(initial in indexById?initial:'cover');
 </script>
 </body>
 </html>
