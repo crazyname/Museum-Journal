@@ -24,6 +24,10 @@ body.tone-light{--paper:#f3ead6;--paper-h:#fff6e7;--ink:#2e2e28;--soft:#676455}b
 @media print{@page{size:125mm 176mm;margin:0}body{background:white!important}body>.topbar,body>.stage,body>.bottombar,body>.searchpanel,body>#measure{display:none!important}#printPages{display:block!important}#printPages>.page{width:125mm!important;height:176mm!important;border:0!important;box-shadow:none;break-after:page;page-break-after:always;transform:none!important}#printPages .pagebody{overflow:hidden}html{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
 
 /* v4 e-reader controls and flexible botanical illustration slots */
+.tocrow .toc-link{flex:1;min-width:0;text-align:left;border:0;background:transparent;color:inherit;padding:0;font:inherit;cursor:pointer}
+.tocrow .toc-extra{display:inline-flex;gap:8px;flex-wrap:wrap;margin-left:8px}
+.tocrow .toc-extra button{border:0;background:transparent;color:#65714f;text-decoration:underline;text-underline-offset:2px;font:11px var(--body);padding:0;cursor:pointer;white-space:nowrap}
+
 .topbar{display:none;position:fixed;top:10px;left:50%;transform:translateX(-50%);width:min(900px,calc(100vw - 20px));z-index:90;padding:9px 12px;border:1px solid #c8bb98;background:#28342df2;color:#ece2ca;box-shadow:0 8px 28px #0006;border-radius:4px}
 body.reader-open .topbar{display:flex}
 .topbar .tools{width:100%;justify-content:center;gap:7px}
@@ -225,6 +229,10 @@ add('sources','参考资料与图版','卷末',[titleBlock('REFERENCES','参考�
 '《植物学》相关植物器官与分类章节（术语依据）',
 '专业植物检索表及野外植物图鉴（检索方法）'].map(s=>textBlock(s,'note')),figure('植物图版的统一线描与淡彩风格示例',112,'landscape'),blk('<div class="note">全部图版位置暂为空白。纸张纹理由原创 CSS 生成。</div>')]);
 let tocRows=[];
+function tocRowHTML(r){
+ const extras=r.extra?.length?'<span class="toc-extra">'+r.extra.map(x=>'<button data-go="'+esc(x.target)+'">'+esc(x.label)+' <span class="pnum" data-refpage="'+esc(x.target)+'"></span></button>').join('')+'</span>':'';
+ return '<div class="tocrow level-'+r.level+'"><button class="toc-link" data-go="'+esc(r.target)+'">'+esc(r.label)+'</button><span class="pnum" data-refpage="'+esc(r.target)+'"></span>'+extras+'</div>';
+}
 function buildTOC(){
  const rows=[];
  const row=(level,label,target,extra=[])=>rows.push({level,label,target,extra});
@@ -250,8 +258,7 @@ function buildTOC(){
   const slice=rows.slice(i*pageSize,(i+1)*pageSize);
   const blocks=[titleBlock('CONTENTS','目 录',i?'目录续页 · 点击条目跳转':'全书目录 · 点击条目跳转')];
   for(const r of slice){
-   const extras=r.extra?.length?'<span class="toc-extra">'+r.extra.map(x=>'<button data-go="'+esc(x.target)+'">'+esc(x.label)+' <span class="pnum" data-refpage="'+esc(x.target)+'"></span></button>').join('')+'</span>':'';
-   blocks.push(blk('<div class="toc-page-row"><button class="tocrow level-'+r.level+'" data-go="'+esc(r.target)+'"><span>'+esc(r.label)+'</span><span class="pnum" data-refpage="'+esc(r.target)+'"></span>'+extras+'</button></div>'));
+   blocks.push(blk(tocRowHTML(r)));
   }
   tocPages.push({id:'contents-'+(i+1),title:'目录',group:'卷首',blocks});
  }
@@ -259,10 +266,7 @@ function buildTOC(){
 }
 function renderTOCPanel(){
  const host=document.getElementById('tocItems');if(!host)return;
- host.innerHTML=tocRows.map(r=>{
-  const extras=r.extra?.length?'<span class="toc-extra">'+r.extra.map(x=>'<button data-go="'+esc(x.target)+'">'+esc(x.label)+' <span class="pnum" data-refpage="'+esc(x.target)+'"></span></button>').join('')+'</span>':'';
-  return '<div class="toc-page-row"><button class="tocrow level-'+r.level+'" data-go="'+esc(r.target)+'"><span>'+esc(r.label)+'</span><span class="pnum" data-refpage="'+esc(r.target)+'"></span>'+extras+'</button></div>';
- }).join('');
+ host.innerHTML=tocRows.map(tocRowHTML).join('');
  resolveFolioLabels(host);
 }
 buildTOC();
