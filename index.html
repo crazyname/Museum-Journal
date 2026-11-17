@@ -129,6 +129,37 @@ body.reader-open .topbar{display:flex}
  .page{cursor:default!important}
 }
 
+
+/* v5 final overrides: compact artwork and side-by-side copy */
+.figure{height:auto!important;min-height:0;max-height:none;border:0;margin:8px auto;padding:5px;background:transparent;gap:4px}
+.figure-landscape{width:82%;aspect-ratio:16/9;margin:8px auto 10px}
+.figure-square{width:44%;aspect-ratio:1/1}
+.figure-portrait{width:38%;aspect-ratio:3/4}
+.figure .prompt-label{font:8px/1.25 Georgia,serif;letter-spacing:.6px;color:#887957;text-align:center}
+.figure .placeholder{font:8.5px/1.35 var(--body);font-weight:400;color:#655c49;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:7;overflow:hidden;overflow-wrap:anywhere;text-align:left}
+.figure figcaption{font:8px/1.3 var(--body);color:#8a7d62;text-align:center;margin:2px 0}
+.figure:has(img){aspect-ratio:auto;min-height:0;height:auto;max-height:180px}
+.figure img{display:block;width:100%;height:auto;max-width:100%;max-height:165px;object-fit:contain;margin:0 auto}
+.figure img[data-small="true"]{max-height:125px}
+.illustration-row{display:grid;grid-template-columns:minmax(0,36%) minmax(0,1fr);gap:12px;align-items:start;margin:8px 0 12px}
+.illustration-row>.figure{width:100%;max-height:185px;min-height:118px;aspect-ratio:3/4;margin:0;padding:5px}
+.illustration-row>.figure.figure-landscape{aspect-ratio:4/3}
+.illustration-copy{min-width:0;font-size:calc(12.5px * var(--reader-size));line-height:1.58}
+.illustration-copy .text{margin:0!important;line-height:1.58}
+.illustration-copy .label{margin:7px 0 3px}
+.illustration-copy .meta-grid{grid-template-columns:1fr;gap:4px;margin:4px 0}
+.page.image-right .illustration-row{grid-template-columns:minmax(0,1fr) minmax(0,36%)}
+.page.image-right .illustration-row>.figure{grid-column:2;grid-row:1}
+.page.image-right .illustration-copy{grid-column:1;grid-row:1}
+.page.image-left .illustration-row>.figure{grid-column:1;grid-row:1}
+.page.image-left .illustration-copy{grid-column:2;grid-row:1}
+.page.image-left .figure-square,.page.image-left .figure-portrait{margin-left:0;margin-right:auto}
+.page.image-right .figure-square,.page.image-right .figure-portrait{margin-left:auto;margin-right:0}
+.coverbody .figure{width:36%;max-height:145px;min-height:110px;aspect-ratio:3/4;margin:4px auto}
+.coverbody .figure .placeholder{-webkit-line-clamp:5}
+.booklink{padding:4px 1px;font-size:calc(12px * var(--reader-size))}
+.booklink small{font-size:10px}
+
 </style>
 </head>
 <body>
