@@ -43,6 +43,9 @@ body.reader-open .topbar{display:flex}
 .figure-landscape{width:100%;aspect-ratio:4/3;margin-left:auto;margin-right:auto}
 .figure-square{width:72%;aspect-ratio:1/1}
 .figure-portrait{width:68%;aspect-ratio:3/4}
+.figure:has(img){aspect-ratio:auto;min-height:0;height:auto}
+.figure img{display:block;width:auto;height:auto;max-width:100%;max-height:430px;object-fit:contain;margin:0 auto}
+.figure img[data-small="true"]{max-height:300px}
 .figure .prompt-label{font:10px Georgia,serif;letter-spacing:1px;color:#887957;text-align:center}
 .figure .mark{display:none}
 .figure .placeholder{font:10px/1.5 var(--body);font-weight:400;color:#655c49;white-space:normal;text-align:left;overflow-wrap:anywhere}
@@ -152,20 +155,21 @@ function figureShapeForTerm(t){
  return 'square';
 }
 function imagePromptFor(caption,shape){
- let detail='完整呈现主体轮廓、器官连接关系与关键识别结构，比例符合真实植物形态';
- if(/头状花序/.test(caption))detail='清楚表现共同花序托、外围总苞片、边缘舌状花与中央管状花的排列关系，可用正面图配局部剖视';
- else if(/扇形叶/.test(caption))detail='完整展示扇形叶片、叶柄、顶端缺刻，以及从基部反复二歧分叉并伸向叶缘的叶脉';
- else if(/叶脉|平行脉|掌状脉/.test(caption))detail='准确描绘叶片轮廓、主脉与侧脉的起点、分叉和走向，叶脉清晰可辨';
- else if(/复叶|小叶/.test(caption))detail='准确呈现叶柄、叶轴、小叶数量、着生位置与小叶之间的连接关系';
- else if(/花|花序|花冠|雄蕊|雌蕊/.test(caption))detail='准确描绘花梗、花托、花被、雄蕊和雌蕊的相对位置，花部结构清晰且比例真实';
- else if(/果|种子|球果/.test(caption))detail='表现果实或球果的整体外形、开裂方式、鳞片或果皮层次，并配适当的局部结构细节';
- else if(/孢子/.test(caption))detail='同时表现蕨叶整体、叶背孢子囊群的排列，并以放大细节展示孢子囊群结构';
- else if(/根|根状茎/.test(caption))detail='展示根或地下茎的生长方向、分枝、节与芽的连接位置，可用局部土层剖面呈现地下结构';
- else if(/枝|茎|树皮|木本/.test(caption))detail='表现枝条与茎的自然姿态、节与芽的着生位置、树皮纹理及分枝关系';
- else if(/检索路径|流程/.test(caption))detail='绘制植物野外观察与形态检索的科学图解，节点关系清楚、留出后期排版标注空间';
- else if(/生境|群落/.test(caption))detail='表现华南典型生境中的植物整体姿态与周围环境，植物形态为视觉主体';
- const framing=shape==='landscape'?'横向构图，主体横向舒展，适合展示结构关系':shape==='square'?'正方形构图，主体居中偏侧，保留完整轮廓':'竖向构图，主体从基部到顶端完整入画';
- return '图像生成提示词：为《博物志·草木》绘制“'+caption+'”的科学植物手绘图。'+detail+'。采用经典植物学图谱风格，细致钢笔线描结合克制的透明水彩，颜色贴近真实植物，暖白纸色背景，留白充足。'+framing+'。不添加文字、标签、边框、水印或装饰性图案，不裁切关键器官。';
+ const detail=[];
+ if(/头状花序/.test(caption))detail.push('清楚表现共同花序托、外围总苞片、边缘舌状花与中央管状花的排列关系，可用正面图配局部剖视');
+ if(/扇形叶/.test(caption))detail.push('完整展示扇形叶片、叶柄、顶端缺刻，以及从基部反复二歧分叉并伸向叶缘的叶脉');
+ if(/叶脉|平行脉|掌状脉/.test(caption))detail.push('准确描绘叶片轮廓、主脉与侧脉的起点、分叉和走向');
+ if(/复叶|小叶/.test(caption))detail.push('准确呈现叶柄、叶轴、小叶数量、着生位置与小叶之间的连接关系');
+ if(/花|花序|花冠|雄蕊|雌蕊/.test(caption)&&!/头状花序/.test(caption))detail.push('表现花梗、花托、花被、雄蕊和雌蕊的相对位置，花部结构清晰且比例真实');
+ if(/果|种子|球果/.test(caption))detail.push('表现果实或球果的整体外形、开裂方式、鳞片或果皮层次，并配适当的局部细节');
+ if(/孢子/.test(caption))detail.push('同时表现蕨叶整体与叶背孢子囊群排列，并以放大细节展示孢子囊群结构');
+ if(/根|根状茎/.test(caption))detail.push('展示根或地下茎的生长方向、分枝、节与芽的连接位置，可用局部土层剖面呈现地下结构');
+ if(/枝|茎|树皮|木本/.test(caption))detail.push('表现枝条与茎的自然姿态、节与芽的着生位置、树皮纹理及分枝关系');
+ if(/检索路径|流程/.test(caption))detail.push('绘制节点关系清楚的植物野外观察与形态检索图解，留出后期排版标注空间');
+ if(/生境|群落/.test(caption))detail.push('表现华南典型生境中的植物整体姿态与周围环境，以植物为视觉主体');
+ if(!detail.length)detail.push('完整呈现主体轮廓、器官连接关系与关键识别结构，比例符合真实植物形态');
+ const framing=shape==='landscape'?'横向构图，主体横向舒展，适合展示结构关系':shape==='square'?'正方形构图，主体完整入画，保留四周观察空间':'竖向构图，主体从基部到顶端完整入画';
+ return '图像生成提示词：为《博物志·草木》绘制“'+caption+'”的科学植物手绘图。'+detail.join('；')+'。采用经典植物学图谱风格，细致钢笔线描结合克制的透明水彩，颜色贴近真实植物，暖白纸色背景，留白充足。'+framing+'。结构与比例须符合植物学资料；不添加文字、标签、边框、水印或装饰图案，不裁切关键器官。';
 }
 const figure=(caption,h=174,shape='auto')=>{
  const mode=shape==='auto'?(/检索路径|流程|生境|群落|典型花果/.test(caption)?'landscape':/叶|花|果|种子|孢子/.test(caption)?'square':'portrait'):shape;
