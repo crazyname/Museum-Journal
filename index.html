@@ -24,6 +24,37 @@ body.tone-light{--paper:#f3ead6;--paper-h:#fff6e7;--ink:#2e2e28;--soft:#676455}b
 @media print{@page{size:125mm 176mm;margin:0}body{background:white!important}body>.topbar,body>.stage,body>.bottombar,body>.searchpanel,body>#measure{display:none!important}#printPages{display:block!important}#printPages>.page{width:125mm!important;height:176mm!important;border:0!important;box-shadow:none;break-after:page;page-break-after:always;transform:none!important}#printPages .pagebody{overflow:hidden}html{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
 
 /* v4 e-reader controls and flexible botanical illustration slots */
+
+/* v5: compact illustrations with text beside portrait artwork */
+.figure{height:auto!important;min-height:0;max-height:none;border:0;margin:8px auto;padding:5px;background:transparent;gap:4px}
+.figure-landscape{width:82%;aspect-ratio:16/9;margin:8px auto 10px}
+.figure-square{width:44%;aspect-ratio:1/1}
+.figure-portrait{width:38%;aspect-ratio:3/4}
+.figure .prompt-label{font:8px/1.25 Georgia,serif;letter-spacing:.6px;color:#887957;text-align:center}
+.figure .placeholder{font:8.5px/1.35 var(--body);font-weight:400;color:#655c49;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:7;overflow:hidden;overflow-wrap:anywhere;text-align:left}
+.figure figcaption{font:8px/1.3 var(--body);color:#8a7d62;text-align:center;margin:2px 0}
+.figure:has(img){aspect-ratio:auto;min-height:0;height:auto;max-height:180px}
+.figure img{display:block;width:100%;height:auto;max-width:100%;max-height:165px;object-fit:contain;margin:0 auto}
+.figure img[data-small="true"]{max-height:125px}
+.illustration-row{display:grid;grid-template-columns:minmax(0,36%) minmax(0,1fr);gap:12px;align-items:start;margin:8px 0 12px}
+.illustration-row>.figure{width:100%;max-height:185px;min-height:118px;aspect-ratio:3/4;margin:0;padding:5px}
+.illustration-row>.figure.figure-landscape{aspect-ratio:4/3}
+.illustration-copy{min-width:0;font-size:calc(12.5px * var(--reader-size));line-height:1.58}
+.illustration-copy .text{margin:0!important;line-height:1.58}
+.illustration-copy .label{margin:7px 0 3px}
+.illustration-copy .meta-grid{grid-template-columns:1fr;gap:4px;margin:4px 0}
+.page.image-right .illustration-row{grid-template-columns:minmax(0,1fr) minmax(0,36%)}
+.page.image-right .illustration-row>.figure{grid-column:2;grid-row:1}
+.page.image-right .illustration-copy{grid-column:1;grid-row:1}
+.page.image-left .illustration-row>.figure{grid-column:1;grid-row:1}
+.page.image-left .illustration-copy{grid-column:2;grid-row:1}
+.page.image-left .figure-square,.page.image-left .figure-portrait{margin-left:0;margin-right:auto}
+.page.image-right .figure-square,.page.image-right .figure-portrait{margin-left:auto;margin-right:0}
+.coverbody .figure{width:36%;max-height:145px;min-height:110px;aspect-ratio:3/4;margin:4px auto}
+.coverbody .figure .placeholder{-webkit-line-clamp:5}
+.booklink{padding:4px 1px;font-size:calc(12px * var(--reader-size))}
+.booklink small{font-size:10px}
+
 .tocrow .toc-link{flex:1;min-width:0;text-align:left;border:0;background:transparent;color:inherit;padding:0;font:inherit;cursor:pointer}
 .tocrow .toc-extra{display:inline-flex;gap:8px;flex-wrap:wrap;margin-left:8px}
 .tocrow .toc-extra button{border:0;background:transparent;color:#65714f;text-decoration:underline;text-underline-offset:2px;font:11px var(--body);padding:0;cursor:pointer;white-space:nowrap}
@@ -177,6 +208,10 @@ const figure=(caption,h=174,shape='auto')=>{
  return blk('<figure class="figure figure-'+mode+'" data-image-prompt="'+esc(prompt)+'"><div class="prompt-label">图像生成提示词</div><div class="placeholder">'+esc(prompt.replace(/^图像生成提示词：/,''))+'</div><figcaption>'+esc(caption)+'</figcaption></figure>');
 };
 const textBlock=(s,cls='text')=>blk(line(s,cls));
+const illustrationTextBlock=(caption,description,shape='portrait',extra='')=>{
+ const image=figure(caption,0,shape).html;
+ return blk('<div class="illustration-row">'+image+'<div class="illustration-copy">'+line(description)+(extra||'')+'</div></div>');
+};
 const linkBlock=(label,target,sub='')=>blk('<button class="booklink" data-go="'+esc(target)+'">'+esc(label)+(sub?'<small>'+esc(sub)+'</small>':'')+'<span class="pnum" data-refpage="'+esc(target)+'"></span></button>');
 const TERM_TAXA={
  'term-2':[{family:'poaceae'}],
@@ -217,17 +252,16 @@ const pages=[];
 function add(id,title,group,blocks){pages.push({id,title,group,blocks});}
 add('cover','草木','卷首',[blk('<div class="coverbody"><div class="seal">植</div><div class="smallcaps">MUSEUM JOURNAL · VOLUME ONE</div><h1>草木</h1><div class="english">FLORA OF SOUTH CHINA</div>'+figure('华南常见植物组合封面：银杏枝叶、木兰花、蕨叶与向日葵花序','185','square').html+'<div class="sub">华南植物野外识别图鉴</div><div class="smallcaps">B6 · FIRST EDITION</div></div>')]);
 add('terms-cover','植物形态图谱','植物形态',[blk('<div class="sectionleaf"><div><div class="kicker">PART I / MORPHOLOGY</div><h1>植物形态图谱</h1><div class="latin">A field glossary of botanical forms</div><div class="rule"></div><p class="text">根、茎、叶、花和果实的外形，是识别植物时最容易记录的线索。</p></div><div class="tiny">ONE CHARACTER · ONE PAGE</div></div>')]);
-terms.forEach((t,i)=>add(t.id,t.name,'形态图谱 · '+t.group,[titleBlock(t.group.toUpperCase(),t.name,t.en),figure(t.name+' · '+t.parts,155,figureShapeForTerm(t)),textBlock(t.description),termTaxonomyBlock(t)]));
+terms.forEach((t,i)=>add(t.id,t.name,'形态图谱 · '+t.group,[titleBlock(t.group.toUpperCase(),t.name,t.en),illustrationTextBlock(t.name+' · '+t.parts,t.description,figureShapeForTerm(t)),termTaxonomyBlock(t)]));
 add('key-intro','野外检索','形态检索',[titleBlock('PART II / IDENTIFICATION','野外检索表','根据形态查找候选科'),textBlock('从叶序、叶片、花、果实、球果或孢子囊群等可见特征出发，依次选择与实物吻合的描述。'),textBlock('检索结果可跳到对应的科页，并继续查看属与物种。叶、花或果不齐全时，可换一组已观察到的性状继续检索。'),figure('华南植物野外形态检索路径图',118,'landscape'),linkBlock('开始检索','key-live'),blk('<div class="note" style="margin-top:11px">适用范围：本册已收录的 13 个示例科，逐步扩展华南地区检索表。</div>')]);
 add('key-live','交互形态检索','形态检索',[titleBlock('FIELD IDENTIFICATION','形态检索','本册示例科级检索'),blk('<div id="live-key" class="key-steps"></div>'),blk('<div class="keycopy">候选科须结合多个器官特征核对，详见相应科页。</div>')]);
-add('family-index-1','科级索引（上）','形态检索',[titleBlock('INDEX OF FAMILIES','科级索引','已收录的植物科'),...families.slice(0,6).map(f=>linkBlock(f.name,'family-'+f.id,f.latin)),linkBlock('科级索引 · 下','family-index-2')]);
-add('family-index-2','科级索引（下）','形态检索',[titleBlock('INDEX OF FAMILIES','科级索引','续'),...families.slice(6).map(f=>linkBlock(f.name,'family-'+f.id,f.latin))]);
+add('family-index-1','科级索引','形态检索',[titleBlock('INDEX OF FAMILIES','科级索引','已收录的植物科'),...families.map(f=>linkBlock(f.name,'family-'+f.id,f.latin))]);
 add('atlas-cover','华南植物图鉴','植物图鉴',[blk('<div class="sectionleaf"><div><div class="kicker">PART III / FAMILY · GENUS · SPECIES</div><h1>华南植物图鉴</h1><div class="latin">Families, genera and species</div><div class="rule"></div><p class="text">每科先列主要形态特征，再介绍所收录的属与种。植物条目包含形态、生境和图版。</p></div><div class="tiny">SOUTH CHINA · SELECTED TAXA</div></div>')]);
 for(const f of families){
   const p=plantById[f.members[0]];
-  add('family-'+f.id,f.name,'植物图鉴 · 科',[titleBlock(f.group+' / '+f.order,f.name,f.latin),textBlock(f.summary),figure(f.name+'（'+f.latin+'）· 典型花果与枝叶',94,'landscape'),blk('<div class="label">主要特征</div><div class="meta-grid">'+(f.traits||[]).slice(0,3).map(([a,b])=>'<div class="meta-cell"><b>'+esc(a)+'</b><span>'+esc(b)+'</span></div>').join('')+'</div>'),linkBlock('进入 '+p.genusName,'genus-'+p.id,p.genusLatin)]);
-  add('genus-'+p.id,p.genusName,'植物图鉴 · 属',[titleBlock(f.name+' / 属',p.genusName,p.genusLatin),textBlock(p.genusDescription),figure(p.genusName+'（'+p.genusLatin+'）· 代表枝叶与花果',170,'portrait'),blk('<div class="label">本册收录</div>'),linkBlock(p.name,p.id,p.latin),blk('<p class="note" style="margin-top:15px">分类：'+esc(f.group)+' · '+esc(f.name)+'</p>')]);
-  add(p.id,p.name,'植物图鉴 · 种',[titleBlock(f.name+' / '+p.genusName,p.name,p.latin),figure(p.name+'（'+p.latin+'）· '+p.look,158,'portrait'),blk('<div class="label">形态</div>'),textBlock(p.leaf,'note'),textBlock(p.flower,'note'),blk('<div class="label">生境与分布</div>'),textBlock(p.habitat,'note'),blk('<div class="label">识别特征</div><div>'+p.key.slice(0,3).map(t=>'<span class="badge">'+esc(t)+'</span>').join('')+'</div>')]);
+  add('family-'+f.id,f.name,'植物图鉴 · 科',[titleBlock(f.group+' / '+f.order,f.name,f.latin),illustrationTextBlock(f.name+'（'+f.latin+'）· 典型花果与枝叶',f.summary,'landscape','<div class="label">主要特征</div><div class="meta-grid">'+(f.traits||[]).slice(0,3).map(([a,b])=>'<div class="meta-cell"><b>'+esc(a)+'</b><span>'+esc(b)+'</span></div>').join('')+'</div>'),linkBlock('进入 '+p.genusName,'genus-'+p.id,p.genusLatin)]);
+  add('genus-'+p.id,p.genusName,'植物图鉴 · 属',[titleBlock(f.name+' / 属',p.genusName,p.genusLatin),illustrationTextBlock(p.genusName+'（'+p.genusLatin+'）· 代表枝叶与花果',p.genusDescription,'portrait','<div class="label">本册收录</div>'+linkBlock(p.name,p.id,p.latin)+'<p class="note" style="margin-top:10px">分类：'+esc(f.group)+' · '+esc(f.name)+'</p>')]);
+  add(p.id,p.name,'植物图鉴 · 种',[titleBlock(f.name+' / '+p.genusName,p.name,p.latin),illustrationTextBlock(p.name+'（'+p.latin+'）· '+p.look,p.leaf+' '+p.flower,'portrait','<div class="label">生境与分布</div>'+line(p.habitat,'note')+'<div class="label">识别特征</div><div>'+p.key.slice(0,3).map(t=>'<span class="badge">'+esc(t)+'</span>').join('')+'</div>')]);
 }
 add('sources','参考资料与图版','卷末',[titleBlock('REFERENCES','参考资料','编辑依据及图版说明'),textBlock('形态术语及分类说明参考植物学教材、专业植物志和植物形态学图解辞典。各科、属、种信息将在后续扩充时逐条核验。'),blk('<div class="label">主要资料</div>'),...[
 '《中国植物志》与 Flora of China（中国植物分类与形态描述）',
@@ -250,10 +284,8 @@ function buildTOC(){
  }
  row(1,'第二章　野外检索','key-intro');
  row(2,'形态检索表','key-live');
- row(2,'科级索引（上）','family-index-1');
- families.slice(0,6).forEach(f=>row(3,f.name,'family-'+f.id));
- row(2,'科级索引（下）','family-index-2');
- families.slice(6).forEach(f=>row(3,f.name,'family-'+f.id));
+ row(2,'科级索引','family-index-1');
+ families.forEach(f=>row(3,f.name,'family-'+f.id));
  row(1,'第三章　华南植物图鉴','atlas-cover');
  families.forEach(f=>{
   row(2,f.name,'family-'+f.id);
@@ -264,7 +296,7 @@ function buildTOC(){
  const pageSize=17,total=Math.ceil(rows.length/pageSize),tocPages=[];
  for(let i=0;i<total;i++){
   const slice=rows.slice(i*pageSize,(i+1)*pageSize);
-  const blocks=[titleBlock('CONTENTS','目 录',i?'目录续页 · 点击条目跳转':'全书目录 · 点击条目跳转')];
+  const blocks=[titleBlock('CONTENTS','目 录','全书目录 · 点击条目跳转')];
   for(const r of slice){
    blocks.push(blk(tocRowHTML(r)));
   }
@@ -280,9 +312,9 @@ function renderTOCPanel(){
 buildTOC();
 let physical=[],indexById={},lookupTexts=[];
 function pageHeader(p,continuation){
- if(p.group.startsWith('形态图谱 · '))return p.group.split(' · ').slice(-1)[0]+(continuation?' · 续':'');
- if(p.group.startsWith('植物图鉴 · '))return p.title+(continuation?' · 续':'');
- return p.group+(continuation?' · 续':'');
+ if(p.group.startsWith('形态图谱 · '))return p.group.split(' · ').slice(-1)[0];
+ if(p.group.startsWith('植物图鉴 · '))return p.title;
+ return p.group;
 }
 function containerHTML(p,blocks,n,continuation){return '<article class="page" data-page="'+esc(p.id)+'"><div class="pagehead"><span>'+esc(pageHeader(p,continuation))+'</span><span class="pagehead-number">'+pad(n+1)+'</span></div><div class="pagebody">'+blocks.map(x=>x.html).join('')+'</div></article>'}
 function paginate(){
