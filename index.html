@@ -75,6 +75,7 @@ body.reader-open .topbar{display:flex}
 .taxon-path button:hover{color:#8a5636}
 .taxon-sep{color:#9a8a68}
 .term-taxonomy .label{margin:3px 0 1px}
+.coverbody .figure-square{width:48%;margin-left:auto;margin-right:auto}
 .reader-open .stage{padding-top:76px}
 @media(max-width:700px){
  .topbar{top:auto;bottom:10px;left:8px;right:8px;transform:none;width:auto;padding:8px}
@@ -175,6 +176,7 @@ const textBlock=(s,cls='text')=>blk(line(s,cls));
 const linkBlock=(label,target,sub='')=>blk('<button class="booklink" data-go="'+esc(target)+'">'+esc(label)+(sub?'<small>'+esc(sub)+'</small>':'')+'<span class="pnum" data-refpage="'+esc(target)+'"></span></button>');
 const TERM_TAXA={
  'term-2':[{family:'poaceae'}],
+ 'term-10':[{family:'poaceae'}],
  'term-4':[{family:'moraceae',plant:'banyan'}],
  'term-6':[{family:'nelumbonaceae',plant:'lotus'}],
  'term-8':[{family:'fabaceae',plant:'clover'}],
@@ -209,7 +211,7 @@ function termTaxonomyBlock(t){
 }
 const pages=[];
 function add(id,title,group,blocks){pages.push({id,title,group,blocks});}
-add('cover','草木','卷首',[blk('<div class="coverbody"><div class="seal">植</div><div class="smallcaps">MUSEUM JOURNAL · VOLUME ONE</div><h1>草木</h1><div class="english">FLORA OF SOUTH CHINA</div>'+figure('华南常见植物组合封面：银杏枝叶、木兰花、蕨叶与向日葵花序','185','portrait').html+'<div class="sub">华南植物野外识别图鉴</div><div class="smallcaps">B6 · FIRST EDITION</div></div>')]);
+add('cover','草木','卷首',[blk('<div class="coverbody"><div class="seal">植</div><div class="smallcaps">MUSEUM JOURNAL · VOLUME ONE</div><h1>草木</h1><div class="english">FLORA OF SOUTH CHINA</div>'+figure('华南常见植物组合封面：银杏枝叶、木兰花、蕨叶与向日葵花序','185','square').html+'<div class="sub">华南植物野外识别图鉴</div><div class="smallcaps">B6 · FIRST EDITION</div></div>')]);
 add('terms-cover','植物形态图谱','植物形态',[blk('<div class="sectionleaf"><div><div class="kicker">PART I / MORPHOLOGY</div><h1>植物形态图谱</h1><div class="latin">A field glossary of botanical forms</div><div class="rule"></div><p class="text">根、茎、叶、花和果实的外形，是识别植物时最容易记录的线索。</p></div><div class="tiny">ONE CHARACTER · ONE PAGE</div></div>')]);
 terms.forEach((t,i)=>add(t.id,t.name,'形态图谱 · '+t.group,[titleBlock(t.group.toUpperCase(),t.name,t.en),figure(t.name+' · '+t.parts,155,figureShapeForTerm(t)),textBlock(t.description),termTaxonomyBlock(t)]));
 add('key-intro','野外检索','形态检索',[titleBlock('PART II / IDENTIFICATION','野外检索表','根据形态查找候选科'),textBlock('从叶序、叶片、花、果实、球果或孢子囊群等可见特征出发，依次选择与实物吻合的描述。'),textBlock('检索结果可跳到对应的科页，并继续查看属与物种。叶、花或果不齐全时，可换一组已观察到的性状继续检索。'),figure('华南植物野外形态检索路径图',118,'landscape'),linkBlock('开始检索','key-live'),blk('<div class="note" style="margin-top:11px">适用范围：本册已收录的 13 个示例科，逐步扩展华南地区检索表。</div>')]);
@@ -244,8 +246,10 @@ function buildTOC(){
  }
  row(1,'第二章　野外检索','key-intro');
  row(2,'形态检索表','key-live');
- row(2,'科级索引','family-index-1');
- families.forEach(f=>row(3,f.name,'family-'+f.id));
+ row(2,'科级索引（上）','family-index-1');
+ families.slice(0,6).forEach(f=>row(3,f.name,'family-'+f.id));
+ row(2,'科级索引（下）','family-index-2');
+ families.slice(6).forEach(f=>row(3,f.name,'family-'+f.id));
  row(1,'第三章　华南植物图鉴','atlas-cover');
  families.forEach(f=>{
   row(2,f.name,'family-'+f.id);
@@ -276,7 +280,7 @@ function pageHeader(p,continuation){
  if(p.group.startsWith('植物图鉴 · '))return p.title+(continuation?' · 续':'');
  return p.group+(continuation?' · 续':'');
 }
-function containerHTML(p,blocks,n,continuation){return '<article class="page" data-page="'+esc(p.id)+'"><div class="pagehead"><span>'+esc(pageHeader(p,continuation))+'</span><span>'+pad(n+1)+'</span></div><div class="pagebody">'+blocks.map(x=>x.html).join('')+'</div></article>'}
+function containerHTML(p,blocks,n,continuation){return '<article class="page" data-page="'+esc(p.id)+'"><div class="pagehead"><span>'+esc(pageHeader(p,continuation))+'</span><span class="pagehead-number">'+pad(n+1)+'</span></div><div class="pagebody">'+blocks.map(x=>x.html).join('')+'</div></article>'}
 function paginate(){
  physical=[];indexById={};lookupTexts=[];
  const host=document.getElementById('measure');host.innerHTML='';
@@ -298,7 +302,7 @@ function paginate(){
   flush();
  }
  host.innerHTML='';
- physical=physical.map((x,i)=>({...x,html:x.html.replace(/<span class="pagehead-number">\d+<\/span>/,'<span class="pagehead-number">'+pad(i+1)+'</span>')}));
+ physical=physical.map((x,i)=>({...x,html:x.html.replace('<article class="page"','<article class="page '+(i%2===0?'image-left':'image-right')+'"').replace(/<span class="pagehead-number">\d+<\/span>/,'<span class="pagehead-number">'+pad(i+1)+'</span>')}));
  document.getElementById('printPages').innerHTML=physical.map(x=>x.html.replace('id="live-key"','data-print-key="1"')).join('');
  document.querySelectorAll('[data-print-key]').forEach(el=>{el.innerHTML='<p class="text">形态检索表可在电子书内逐步选择特征。</p><p class="note">打印版请使用书中的科级索引核对形态特征，并翻至对应科、属、种页。</p>'});
  resolveFolioLabels(document.getElementById('printPages'));
@@ -327,7 +331,6 @@ function render(){
   if(i<physical.length){
    wrap.innerHTML=physical[i].html;
    const page=wrap.querySelector('.page');
-   page.classList.add(i%2===0?'image-left':'image-right');
    page.dataset.physicalIndex=String(i);
    page.style.transform='scale('+factor+')';page.style.transformOrigin='0 0';
   }
@@ -370,7 +373,7 @@ document.addEventListener('click',e=>{
 document.getElementById('searchInput').addEventListener('input',e=>search(e.target.value));
 document.getElementById('progress').addEventListener('input',e=>go(Number(e.target.value)-1));
 document.getElementById('spread').addEventListener('click',e=>{
- if(e.target.closest('button,a,input,[data-go],[data-key]'))return;
+ if(Date.now()<suppressTapUntil||e.target.closest('button,a,input,[data-go],[data-key]'))return;
  const page=e.target.closest('.page');if(!page)return;
  const rect=page.getBoundingClientRect(),x=(e.clientX-rect.left)/rect.width;
  if(spreadCount()===1){if(x<.34)go(state.page-1);else if(x>.66)go(state.page+1);else setReaderUI(!document.body.classList.contains('reader-open'));}
@@ -380,9 +383,9 @@ document.getElementById('spread').addEventListener('click',e=>{
   else{if(x>.48)go(state.page+2);else setReaderUI(!document.body.classList.contains('reader-open'));}
  }
 });
-let touchStart=null;
+let touchStart=null,suppressTapUntil=0;
 document.getElementById('spread').addEventListener('touchstart',e=>{if(e.target.closest('button,a,input,[data-go],[data-key]')){touchStart=null;return;}touchStart=e.changedTouches[0].clientX;},{passive:true});
-document.getElementById('spread').addEventListener('touchend',e=>{if(touchStart===null)return;const dx=e.changedTouches[0].clientX-touchStart;touchStart=null;if(Math.abs(dx)>55)go(state.page+(dx<0?spreadCount():-spreadCount()));},{passive:true});
+document.getElementById('spread').addEventListener('touchend',e=>{if(touchStart===null)return;const dx=e.changedTouches[0].clientX-touchStart;touchStart=null;if(Math.abs(dx)>55){suppressTapUntil=Date.now()+500;go(state.page+(dx<0?spreadCount():-spreadCount()));}},{passive:true});
 document.addEventListener('keydown',e=>{
  if(e.key==='Escape'){searchOpen(false);document.getElementById('tocPanel').classList.remove('open');setReaderUI(false);}
  if(e.key==='/'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();searchOpen(true);}
